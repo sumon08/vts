@@ -1,0 +1,18 @@
+
+menu "Engine Command List"
+
+    config TEST_COMMAND_ID
+        hex "Test command. This command do nothing. just reply ack"
+        default "0x40"
+
+
+    config ECHO_COMMAND_ID
+        hex "Echo command. This command take one parameter as string end after execution return the text."
+        default "0x41"
+
+
+    config COMMAND_ENGINE_STATUS_ID
+        hex "Engine status command. This command carry engine status command at a specific time."
+        default "0x01"
+        
+endmenu

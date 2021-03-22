@@ -1,0 +1,294 @@
+\documentclass[10pt,legal]{article}
+
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage[left=2cm, right=2cm, top=2cm]{geometry}
+\usetikzlibrary{shapes,arrows}
+
+\title{VTS FLOW CHART}
+\date {2018 \\ September}
+\author{Sumit Ranjan Chakraborty, Omar Faruk and Md. Mahmudul Hasan Sumon}
+
+\begin{document}
+\pagestyle{empty}
+\maketitle
+\newpage{Engine Monitor}
+% Define block styles
+\tikzstyle{decision} = [diamond, draw, fill=green!30,text width=7em, text badly centered, node distance=3cm, inner sep=1pt]
+\tikzstyle{block} = [rectangle, draw, fill=orange!30, text width=16em, text centered, rounded corners, minimum height=3em]
+\tikzstyle{cloud} = [draw, ellipse,fill=red!50, node distance=3cm,minimum height=2em]
+%\tikzstyle{line} = [draw, -latex']
+%\tikzstyle{arrow} = [thick, rounded corners=10pt , ->, >=stealth]
+\tikzstyle{decision1} = [diamond, draw, fill=green!30,text width=12em, text badly centered, node distance=3cm, inner sep=1pt]
+\tikzstyle{decision2} = [diamond, draw, fill=green!30,text width=9em, text badly centered, node distance=3cm, inner sep=1pt]
+
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[scale=0.65,transform shape]
+
+		\node [cloud] (init0) {Start};
+		\node [block, below of=init0, node distance=2cm] 		(init1) 		{Initialize GPIO};
+		\node [block, below of=init1, node distance=2cm]		(read4)			{Read:vehilce\_speed,gps\_availability};
+		%\node [decision, below of=decide2, node distance=5cm] 	(decide3)	    {If gps\_status == 1};
+		%\node [decision, below of=decide3, node distance=4cm] 	(decide4)	    {If speed$<$safe\_speed};
+		\node [block, below of=read4, node distance=2cm]		(execute0)		{Execute EngineLockAlgorithm()};
+		
+		\node [block, below of=execute0, node distance=2cm] 	(read0) 		{Read: engine\_status from Memory};
+		\node [decision, below of=read0, node distance=3cm] 	(decide0)	    {If engine\_status != ReadGPIO()};
+		\node [decision, below of=decide0, node distance=4cm] 	(decide1)		{If engine\_status == 1};
+		\node [block, below of=decide1, node distance=3cm] 		(read2) 		{Read Time};
+		\node [block, below of=read2, node distance=2cm] 		(post0) 		{Post(Time,"Engine Started") in Event Manager };
+		\node [block, right of=decide1, node distance=7cm] 		(read3) 		{Read Time};
+		\node [block, below of=read3, node distance=2cm] 		(post1) 		{Post(Time,"Engine Stopped") in Event Manager };
+		\node [block, below of=post0, node distance=2cm] 		(save0) 		{Save engine\_status to memory};
+		
+		
+		
+		
+		\draw [->] (init0)-- (init1);
+		\draw [->] (init1)-- (read4);
+		%\draw [->] (read4)-- (decide2);
+		\draw [->] (execute0)--(read0);
+		\draw [->] (read0)-- (decide0);
+		\draw [->] (read4)--(execute0);
+		\draw [->] (decide0)--node[left]{Yes} (decide1);
+		\draw [->] (decide0)--node[above]{No}(5,-11)|-(3,-4)--(read4);
+		\draw [->] (decide1)--node[left]{Yes} (read2);
+		\draw [->] (decide1)--node[above]{No} (read3);
+		\draw [->] (read3)-- (post1);
+		\draw [->] (read2)-- (post0);
+		\draw [->] (post0)-- (save0);
+		\draw [->] (post1)|-(5,-22)--(save0);
+		\draw [->] (save0)|-(-5,-24)--(-5,-4)--(read4);
+		
+		
+	\end{tikzpicture}
+	\caption{Engine Monitor flow chart}	 
+\end{figure}
+
+\newpage{}
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[scale=0.6,transform shape]
+	
+	\node [cloud] (init0) {Start};
+	\node [block,below of=init0, node distance=2cm]			(read0)		{Read: vehicle\_speed,gps\_availabilty from event manager and engine\_lock\_required,};
+	\node [decision2, below of=read0, node distance=4cm]	(decide0)	{If \r engine\_status\_required == "LOCK"};
+	\node [decision2, right of=decide0, node distance=14cm]	(decide7)	{If \r engine\_status\_required == "UNLOCK"};
+	\node [decision, below of=decide7, node distance=14cm]	(decide8)	{If (key\_generated == 1) };
+	\node [decision, below of=decide8, node distance=5cm]	(decide9)	{If (key\_matched == 1) };
+	\node [block, below of=decide9, node distance=4cm]		(execute2)	{Unlock Engine via GPIO};
+	\node [block, below of=execute2, node distance=2cm]		(post2)	{Post: "Engine Unlocked" in Command Manager};		
+	\node [decision, below of=decide0, node distance=5cm]	(decide1)	{If gps\_available == 1};
+	\node [decision, below of=decide1, node distance=4cm]	(decide2)	{If speed$<$safe\_speed};
+	\node [decision, below of=decide2, node distance=5cm]	(decide3)	{If (key\_generated == 1) };
+	\node [decision, right of=decide3, node distance=7cm]	(decide6)	{If (key\_generated != 1) };
+	\node [block, below of=decide6, node distance=3cm]		(execute1)	{Generate key};
+	\node [block, below of=execute1, node distance=2cm]		(post1)		{Post: key in Command Manger and set:key\_generated=1};
+	\node [decision, below of=decide3, node distance=5cm]	(decide4)	{If (key\_matched == 1) };
+	\node [decision, left of=decide4, node distance=5cm]	(decide5)	{If (key\_matched != 1) };
+	\node [block, below of=decide4, node distance=4cm]		(execute0)	{Lock Engine via GPIO};
+	\node [block, below of=execute0, node distance=2cm]		(post0)	{Post: "Engine Locked" in Command Manager};
+	\node [block, above of=decide5, node distance=5cm]		(set0)	{Set: key\_generated = 0};
+	\node [block, above of=decide7, node distance=4cm]		(set1)	{Set: key\_generated = 0};
+	
+	\draw [->]	(init0)--(read0);
+	\draw [->]	(read0)--(decide0);
+	\draw [->]	(decide0)--(decide1);
+	\draw [->]	(decide0)--(decide7);
+	\draw [->]	(decide7)--(decide8);
+	\draw [->]	(decide8)--(decide9);
+	\draw [->]	(decide8)--(decide6);
+	\draw [->]	(decide9)--(execute2);
+	\draw [->]	(execute2)--(post2);
+	\draw [->]	(decide1)--(decide2);
+	\draw [->]	(decide2)--(decide3);
+	\draw [->]	(decide3)--(decide4);
+	\draw [->]	(decide4)--(execute0);
+	\draw [->]	(execute0)--(post0);
+	\draw [->]	(decide3)--(decide6);
+	\draw [->]	(decide4)--(decide5);
+	\draw [->]	(decide6)--(execute1);
+	\draw [->]	(execute1)--(post1);
+	\draw [->]	(decide1)--(-5,-11)--(-5,-2)--(read0);
+	\draw [->]	(execute1)--(post1);
+	\draw [->]	(decide5)--(set0);
+	\draw [->]	(set0)--(-10,-20)--(-10,-2)--(read0);
+	\draw [->]	(decide9)--(18,-25)--(18,-2)--(set1);
+	\draw [->]	(set1)--(read0);
+	
+	\end{tikzpicture}
+\caption{Engine Lock Algorithm flow chart}	 
+\end{figure}
+
+
+\newpage{AC Monitor}
+% Define block styles
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[scale=0.7,transform shape]
+	
+	\node [cloud] (init0) {Start};
+	\node [block, below of=init0, node distance=2cm] 		(init1) 		{Initialize GPIO};
+	\node [block, below of=init1, node distance=2cm] 		(read0) 		{Read ac\_status from Memory};
+	\node [block, below of=read0, node distance=2cm] 		(read4) 		{ac\_adc = read ADC of GPIO};
+	\node [decision1, below of=read4, node distance=5cm] 	(decide2)		{If ((ac\_adc$>$required\_ADC)\&\&
+		(ac\_type==12V)
+		or,(ac\_adc$<$required\_ADC)\&\&
+		(ac\_type==5V))};
+	\node [block, below of=decide2, node distance=5cm] 		(set0) 		{ac\_status\_present = 1};
+	\node [block, right of=decide2, node distance=7cm] 		(set1) 		{ac\_status\_present = 0};	
+
+	\node [decision, right of=set0, node distance=7cm] 		(decide0)	    {If ac\_status != ac\_status\_present};
+	\node [decision, below of=decide0, node distance=5cm] 	(decide1)		{If ac\_status == 1};
+	\node [block, below of=decide1, node distance=3cm] 		(read2) 		{Read Time};
+	\node [block, below of=read2, node distance=2cm] 		(post0) 		{Post(Time,"AC Started") in Event Manager };
+	\node [block, right of=decide1, node distance=7cm] 		(read3) 		{Read Time};
+	\node [block, below of=read3, node distance=2cm] 		(post1) 		{Post(Time,"AC Stopped") in Event Manager };
+	\node [block, below of=post0, node distance=2cm] 		(save0) 		{Set: ac\_status\_memory=ac\_status};
+	
+
+	
+	
+	
+	\draw [->] (init0)-- (init1);
+	\draw [->] (init1)-- (read0);
+	\draw [->] (read0)-- (read4);
+	\draw [->] (read4)--(decide2);
+	\draw [->] (decide2)--node[left]{Yes} (set0);
+	\draw [->] (decide2)--node[above]{No} (set1);
+	\draw [->] (set0)--(decide0);
+	\draw [->] (set1)--(decide0);
+	\draw [->] (decide0)--node[left]{Yes} (decide1);
+	\draw [->] (decide1)--node[left]{Yes} (read2);
+	\draw [->] (decide1)--node[above]{No} (read3);
+	\draw [->] (read3)-- (post1);
+	\draw [->] (read2)-- (post0);
+	\draw [->] (post0)-- (save0);
+	\draw [->] (post1)|-(10,-28)--(save0);
+	\draw [->] (save0)|-(-5,-29)--(-5,-4)--(read0);
+	\draw [->] (decide0)--node[above]{No}(12,-16)--(12,-4)--(read0);
+	
+	
+	\end{tikzpicture}
+	\caption{AC Monitor flow chart}	 
+\end{figure}
+
+\newpage{Battery Monitor}
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[scale=0.7,transform shape]
+	
+	\node [cloud] (init0) {Start};
+	\node [block, below of=init0, node distance=2cm] 		(init1) 		{Initialize GPIO};
+	\node [block, below of=init1, node distance=2cm] 		(read0) 		{Read battery\_status from Memory};
+	\node [block, below of=read0, node distance=2cm] 		(read4) 		{battery\_adc = read ADC of GPIO};
+	\node [decision2, below of=read4, node distance=5cm] 	(decide2)		{If ac\_adc$>$required\_ADC};
+	\node [block, below of=decide2, node distance=5cm] 		(set0) 		{battery\_status\_present = 1};
+	\node [block, right of=decide2, node distance=7cm] 		(set1) 		{battery\_status\_present = 0};	
+	
+	\node [decision2, right of=set0, node distance=7cm] 	(decide0)	    {If battery\_status !=battery\_status\_present};
+	\node [decision, below of=decide0, node distance=5cm] 	(decide1)		{If battery\_status == 1};
+
+	\node [block, right of=decide1, node distance=7cm] 		(read3) 		{Read Time};
+	\node [block, below of=read3, node distance=2cm] 		(post1) 		{Post(Time,"Battery Disconnected") in Event Manager };
+	\node [block, below of=post1, node distance=2cm] 		(save0) 		{Set: battery\_status\_memory=battery\_status};
+	
+	
+	
+	
+	
+	\draw [->] (init0)-- (init1);
+	\draw [->] (init1)-- (read0);
+	\draw [->] (read0)-- (read4);
+	\draw [->] (read4)--(decide2);
+	\draw [->] (decide2)--node[left]{Yes} (set0);
+	\draw [->] (decide2)--node[above]{No} (set1);
+	\draw [->] (set0)--(decide0);
+	\draw [->] (set1)--(decide0);
+	\draw [->] (decide0)--node[left]{Yes} (decide1);
+	\draw [->] (decide1)|-(7,-25)--node[above]{Yes} (save0);
+	\draw [->] (decide1)--node[above]{No} (read3);
+	\draw [->] (read3)-- (post1);
+	\draw [->] (post1)-- (save0);
+	\draw [->] (save0)|-(-5,-27)--(-5,-4)--(read0);
+	\draw [->] (decide0)--node[above]{No}(14,-16)|-(14,-4)--(read0);
+	
+	
+	\end{tikzpicture}
+	\caption{Battery Monitor flow chart}	 
+\end{figure}
+
+\newpage{Panic Monitor}
+
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[scale=0.85,transform shape]
+	
+	\node [cloud] (init0) {Start};
+	\node [block, below of=init0, node distance=2cm] 		(init1) 		{Initialize GPIO};
+	\node [block, below of=init1, node distance=2cm] 		(read0) 		{Read panic\_status from Memory};
+	\node [decision, below of=read0, node distance=3cm] 	(decide0)	    {If panic\_status != ReadGPIO()};
+	\node [decision, below of=decide0, node distance=5cm] 	(decide1)		{If panic\_status == 1};
+
+	\node [block, right of=decide1, node distance=7cm] 		(read3) 		{Read Time};
+	\node [block, below of=read3, node distance=2cm] 		(post1) 		{Post(Time,"Panic Button Released") in Event Manager };
+	\node [block, below of=post1, node distance=2cm] 		(save0) 		{Save panic\_status to memory};
+	
+	
+	
+	
+	\draw [->] (init0)-- (init1);
+	\draw [->] (init1)-- (read0);
+	\draw [->] (read0)-- (decide0);
+	\draw [->] (decide0)--node[left]{Yes} (decide1);
+	\draw [->] (decide0)--node[above]{No}(7,-7)--(7,-4)-- (read0);
+	\draw [->] (decide1)|-(0,-16)--node[above]{Yes} (save0);
+	\draw [->] (decide1)--node[above]{No} (read3);
+	\draw [->] (read3)-- (post1);	
+	\draw [->] (post1)--(save0);
+	\draw [->] (save0)|-(-5,-18)--(-5,-4)--(read0);	
+	
+	\end{tikzpicture}
+	\caption{Panic Monitor flow chart}	 
+\end{figure}
+
+
+\newpage{Over Speed monitor}
+\tikzstyle{decision3} = [diamond, draw, fill=green!30,text width=11em, text badly centered, node distance=3cm, inner sep=1pt]
+\begin{figure}[h!]
+	\centering
+	\begin{tikzpicture}[scale=0.85,transform shape]
+	
+	\node [cloud] (init0) {Start};
+	\node [block, below of=init0, node distance=2cm]		(read0)		{Get speed\_data from Event Manager};
+	\node [decision3, below of=read0,node distance=5cm] 	(decide0)	{if
+	((over\_speed\_alert\_triggered
+	==0)
+	\&\&(speed\_data$>$
+	threshold\_speed))};
+	\node [block, below of=decide0, node distance=5cm]		(set0)		{Set:over\_speed\_alert\_triggered=1
+	speed\_violation=1};
+	\node [block, right of=decide0, node distance=7cm]		(set2)		{Set: speed\_violation=0};
+	\node [block, below of=set0, node distance=2cm]			(set1)		{start timer to maintain over\_speed\_alert\_triggered==1 until over\_speed\_alert\_interval};
+	\node [block, below of=set1, node distance=2cm]			(post0)		{Post(Time,Speed,"Speed Violated") in Event Manager};
+	
+	\draw [->]	(init0)--(read0);
+	\draw [->]	(read0)--(decide0);
+	\draw [->]	(decide0)--node[left]{Yes}(set0);
+	\draw [->]	(decide0)--node[above]{No}(set2);
+	\draw [->]	(set0)--(set1);
+	\draw [->]	(set1)--(post0);
+	\draw [->]	(post0)|-(-5,-18)--(-5,-2)--(read0);
+	\draw [->]	(set2)|-(3,-2)--(read0);
+	
+	\end{tikzpicture}
+	\caption{Over Speed Monitor flow chart}	 
+\end{figure}
+
+
+\end{document}

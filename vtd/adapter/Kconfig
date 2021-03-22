@@ -1,0 +1,18 @@
+menu "Adapter Configuration"
+
+	config NO_OF_READ_FD
+		int "CONFIG_NO_OF_READ_FD"
+		default 16
+
+	config NO_OF_WRITE_FD
+		int "CONFIG_NO_OF_WRITE_FD"
+		default 16
+
+	config TEST_ON_LINUX
+		int "CONFIG_TEST_ON_LINUX"
+		default 0
+
+	config TEST_ON_NUTTX
+		int "CONFIG_TEST_ON_NUTTX"
+		default 0
+endmenu

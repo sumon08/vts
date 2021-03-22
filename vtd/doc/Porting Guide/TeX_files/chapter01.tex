@@ -1,0 +1,40 @@
+\chapter{Hardware Specification}
+\paragraph*{}
+VTS Version 2 is based on ARM Cortex-M4 architecture. STM32F401RC micro-controller from STMicroelectronics has been used. STM32F401RC Features has been shortlisted below.
+
+\section*{Microcontroller Features}
+\begin{center}
+		\item[Clock Speed] 	: 84 MHz
+		\item[Flash memory]	: 256KB
+		\item[RAM] 			: 64KB
+		\item[Package] 		: LQFP64
+		\item[IO]			: 50
+		\item[USART] 		: 3
+		\item[SPI]			: 4
+		\item[I2C]			: 3
+\end{center}
+
+With the above micro-controller SIM868 from SIMCOM has been used. SIM868 module is a complete Quad-Band GSM/GPRS module which combines GNSS technology for satellite navigation.
+\pagebreak
+\section*{General features of SIM868}
+\begin{flushleft}
+	\item Quad-band 850/900/1800/1900MHz 
+	\item GPRS multi-slot class 12/10
+	\item GPRS mobile station class B
+	\item Compliant to GSM phase 2/2+
+	\item Class 4 (2 W @ 850/900MHz)
+	\item Class 1 (1 W @ 1800/1900MHz)
+	\item Dimensions: 17.6*15.7*2.3mm
+	\item Weight: 1.5g
+	\item Control via AT commands (3GPP TS 27.007, 27.005 and SIMCom enhanced AT Commands)
+	\item Supply voltage range 3.4 ~ 4.4V
+	\item Low power consumption
+\end{flushleft}
+
+\section*{GPS Features}
+\begin{flushleft}
+	\item Receiver type: 22 tracking /66 acquisition channel, GPS L1 C/A code
+	\item Sensitivity: Tracking: -166 dBm, Cold starts : -148 dBm
+	\item Time-To-First-Fix : Cold starts: 29s, Hot starts: 1s, Warm starts:  22s 
+	\item Accuracy: Horizontal position :  2.5m CEP
+\end{flushleft}

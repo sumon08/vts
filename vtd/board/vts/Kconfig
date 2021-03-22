@@ -1,0 +1,47 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config EXAMPLES_VTS
+	bool "VTS app"
+	default n
+	---help---
+		Enable the VTS App
+
+if EXAMPLES_VTS
+
+config EXAMPLES_VTS_PROGNAME
+	string "Program name"
+	default "vts"
+	depends on BUILD_KERNEL
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+config VTS_CXXINITIALIZE
+	bool "C++ Initialization"
+	default y
+	depends on HAVE_CXX && HAVE_CXXINITIALIZE
+	---help---
+		By default, if CONFIG_HAVE_CXX and CONFIG_HAVE_CXXINITIALIZE are
+		defined, then this example will call the NuttX function to
+		initialize static C++ constructors.  This option may be disabled,
+		however, if that static initialization was performed elsewhere.
+
+config EXAMPLES_VTS_PRIORITY
+	int "VTS task priority"
+	default 100
+
+config EXAMPLES_VTS_STACKSIZE
+	int "VTS stack size"
+	default 2048
+
+config DEBUG_SERIAL_PATH
+	string "Serial character device map"
+	default "/dev/ttyS0"
+	---help---
+		Nuttx maps the US[A]RT to character device in /dev/ directory as ttyS0, ttyS1.
+
+
+endif

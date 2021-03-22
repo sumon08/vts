@@ -1,0 +1,35 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+
+
+
+config VTS_PROGNAME
+	string "Program name"
+	default "vts"
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+menu "Features"
+
+	config ENABLE_MODEM
+		bool "Enable Modem"
+		default "y"
+
+	config ENABLE_GPS
+		bool "Enable GPS"
+		default "y"
+endmenu
+
+
+source "command/Kconfig"
+source "event/Kconfig"
+source "module/Kconfig"
+source "source/Kconfig"
+source "../adapter/Kconfig"
+source "protocol/Kconfig"
+
+

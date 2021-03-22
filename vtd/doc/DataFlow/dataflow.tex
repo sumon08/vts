@@ -1,0 +1,393 @@
+\documentclass[10pt,legal]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usepackage{float}
+\usetikzlibrary{shapes,arrows,decorations.pathmorphing,backgrounds,positioning,fit,petri}
+\usepackage[left=2.5cm, right=2cm, top=2.5cm]{geometry}
+
+
+
+\title{DataFlow Diagram of various process/module}
+\date {2018 \\ September}
+\usepackage{hyperref}
+\usepackage{listings}
+\hypersetup{colorlinks=true,linkcolor=blue,}
+
+
+\author{Omar Faruk \\ Md. Mahmudul Hasan Sumon \\ Sumit Ranjan Chakrobarti}
+
+\begin{document}
+%\pagestyle{empty}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+% Define block styles
+\tikzstyle{decision} = [diamond, draw, fill=blue!20,text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,minimum height=2em]
+\tikzstyle{arrow} = [thick, rounded corners=10pt , ->, >=stealth]
+\tikzstyle{process} = [draw,circle,fill=green!20,radius = 3.5cm, text width=4em, text centered, node distance=2cm, minimum height = 2em]
+\tikzstyle{datasource} = [rectangle, draw, fill=blue!20, text width=5em, text centered, minimum height=4em]
+\tikzset{>=latex}
+\tikzstyle{pentagon} = [regular polygon, regular polygon sides=5,fill=red!20, node distance=3cm,minimum height=2em, shape border rotate=180]
+
+\newpage
+
+
+
+\section{Design idea}
+VTS is a complex project from the design point though it looks simple from user perspective. It has many parallel task to perform, handle lots of failure condition to manage smooth operation. To kept design simple we decided to split full firmware into several module. Each module will perform very specific task. We have four type of information need to share among different module. Below is the list of information type:
+\begin{enumerate}
+	\item Event data: We decide to classified those data as event data which have multiple user of consume. Event source trigger the event and Event manager will dispatch that data to other module. To receive event data module must need to register or subscribe to that event. This way code extension will easy. Lets see an example. We have GPS location data which will be produce from GPS module. This data data is needed by command module, GeoFence module, Overspeed module, Destination tracking module. 
+	\item Configuration data
+	\item Command data
+	\item Logging data
+\end{enumerate}
+
+
+
+
+
+\newpage
+\section{Overview of top level event flow}
+	Each of the modules has 4 types of virtual communication port for Configuration, Logging, Command, Event communication.
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture} [node distance = 1cm, auto]
+	\node [process]													(Event)			{Event Manager};
+	\node [process, right of=Event, node distance=3cm]				(CMD)			{Command Manager};
+	\node [process, left  of=Event, node distance=3cm,yshift=3cm]	(GPS)			{GPS Manager};
+	\node [process, below of=GPS, node distance=3cm]				(Engine)		{Engine Monitor};
+	\node [process, below of=Engine, node distance=3cm]				(AC)			{AC Monitor};
+	\node [process, below of=AC, node distance=3cm]					(Loud)			{Loud Horn Service};
+	\node [process, below of=Loud, node distance=3cm]				(Battery)		{Battery Monitor};
+	\node [process, right of=Battery, node distance=3cm]			(Panic)			{Panic Monitor};
+	\node [process, right of=Panic, node distance=3cm]				(OverSpeed)		{Over Speed Monitor};
+	\node [process, right of=OverSpeed, node distance=3cm]			(GeoFence)		{GeoFence Monitor};
+	\node [process, right of=GeoFence, node distance=3cm]			(Dest)			{Destination Tracking};
+	\node [process, right of=CMD, node distance=3cm]				(SMS)			{SMS Manager};
+	%\node [process, above of=Event, node distance=3cm]				(Config)		{Configuration Manager};
+	\node [process, above of=SMS, node distance=3cm]				(TCP)			{TCP Manager};
+	\node [process, above  of=GPS, node distance=3cm]				(Push)			{Push Notification};
+	\node [process, right of=Push, node distance=3cm]				(FOTA)			{FOTA Manager};
+	\node [process, right of=FOTA, node distance=3cm]				(PM)			{Power Managment};
+%	\node [process, right of=PM, node distance=3cm]					(USER)			{User Manager};
+	\node [process, below of=SMS, node distance=3cm]				(DBGPort)		{Debug Port};
+	\node [process, right of=SMS, node distance=4cm] 				(Modem)			{Modem Library};
+	\node [process, below of=Modem, node distance=3cm]				(Serial)		{Serial Port};
+		
+	
+	\draw [->]	(GPS)--(Event);
+	\draw [->]	(Engine) -- (Event);
+	\draw [->]	(AC)--(Event);
+	\draw [->]	(Loud)--(Event);
+	\draw [->]	(Battery) to [bend right=10](Event);
+	\draw [->]	(Panic) to (Event);
+	\draw [<->]	(OverSpeed) to (Event);
+	\draw [<->]	(GeoFence)--(Event);
+	\draw [<->]	(Dest)--(Event);
+%	\draw [<->]	(FOTA)--(CMD);
+	\draw [<->]	(SMS)--(CMD);
+	\draw [<->]	(TCP)--(CMD);
+%	\draw [<->]	(USER)--(CMD);
+	\draw [->]	(Push)--(Event);
+	\draw [->]	(Event)--(CMD);
+	\draw [->]	(FOTA) to (Event);
+	\draw [->] 	(PM) to (Event);
+	\draw [<->]	(CMD) to (DBGPort);
+	\draw [<->] (SMS) to (Modem);
+	\draw [<->] (TCP) to (Modem);
+	\draw [<->] (DBGPort) to (Serial);
+	
+	\end{tikzpicture}
+	\caption{Overview of Event Flow}
+\end{figure}
+
+
+\section{Overview of top level command flow}
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture} [node distance = 1cm, auto]
+%	\node [process]													(Event)			{Event Manager};
+	\node [process]													(CMD)			{Command Manager};
+	\node [process, left  of=CMD, node distance=5cm,yshift=3cm]		(GPS)			{GPS Manager};
+	\node [process, below of=GPS, node distance=3cm]				(Engine)		{Engine Monitor};
+	\node [process, below of=Engine, node distance=3cm]				(AC)			{AC Monitor};
+	\node [process, below of=AC, node distance=3cm]					(Loud)			{Loud Horn Service};
+	\node [process, below of=Loud, node distance=3cm]				(Battery)		{Battery Monitor};
+	\node [process, right of=Battery, node distance=3cm]			(Panic)			{Panic Monitor};
+	\node [process, right of=Panic, node distance=3cm]				(OverSpeed)		{Over Speed Monitor};
+	\node [process, right of=OverSpeed, node distance=3cm]			(GeoFence)		{GeoFence Monitor};
+	\node [process, right of=GeoFence, node distance=3cm]			(Dest)			{Destination Tracking};
+	\node [process, right of=CMD, node distance=5cm]				(SMS)			{SMS Manager};
+	%\node [process, above of=Event, node distance=3cm]				(Config)		{Configuration Manager};
+	\node [process, above of=SMS, node distance=3cm]				(TCP)			{TCP Manager};
+	\node [process, above  of=GPS, node distance=3cm]				(Push)			{Push Notification};
+	\node [process, right of=Push, node distance=3cm]				(FOTA)			{FOTA Manager};
+	\node [process, right of=FOTA, node distance=3cm]				(PM)			{Power Managment};
+	%	\node [process, right of=PM, node distance=3cm]					(USER)			{User Manager};
+	\node [process, below of=SMS, node distance=3cm]				(DBGPort)		{Debug Port};
+	\node [process, right of=SMS, node distance=4cm] 				(Modem)			{Modem Library};
+	\node [process, below of=Modem, node distance=3cm]				(Serial)		{Serial Port};
+	
+	
+	\draw [<->]	(GPS)--(CMD);
+	\draw [<->]	(Engine) -- (CMD);
+	\draw [<->]	(AC)--(CMD);
+	\draw [<->]	(Loud)--(CMD);
+	\draw [<->]	(Battery) to [bend right=10](CMD);
+	\draw [<->]	(Panic) to (CMD);
+	\draw [<->]	(OverSpeed) to (CMD);
+	\draw [<->]	(GeoFence)--(CMD);
+	\draw [<->]	(Dest)--(CMD);
+	%	\draw [<->]	(FOTA)--(CMD);
+	\draw [<->]	(SMS)--(CMD);
+	\draw [<->]	(TCP)--(CMD);
+	%	\draw [<->]	(USER)--(CMD);
+	\draw [<->]	(Push)--(CMD);
+	\draw [<->]	(Event)--(CMD);
+	\draw [<->]	(FOTA) to (CMD);
+	\draw [<->] (PM) to (CMD);
+	\draw [<->]	(CMD) to (DBGPort);
+	\draw [<->] (SMS) to (Modem);
+	\draw [<->] (TCP) to (Modem);
+	\draw [<->] (DBGPort) to (Serial);
+	
+	\end{tikzpicture}
+	\caption{Overview of Command Flow}
+\end{figure}
+
+\section{Overview of top level configuration flow}
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture} [node distance = 1cm, auto]
+	\node [process]													(Event)			{Config Manager};
+	\node [process, right of=Event, node distance=3cm]				(CMD)			{Command Manager};
+	\node [process, left  of=Event, node distance=3cm,yshift=3cm]	(GPS)			{GPS Manager};
+	\node [process, below of=GPS, node distance=3cm]				(Engine)		{Engine Monitor};
+	\node [process, below of=Engine, node distance=3cm]				(AC)			{AC Monitor};
+	\node [process, below of=AC, node distance=3cm]					(Loud)			{Loud Horn Service};
+	\node [process, below of=Loud, node distance=3cm]				(Battery)		{Battery Monitor};
+	\node [process, right of=Battery, node distance=3cm]			(Panic)			{Panic Monitor};
+	\node [process, right of=Panic, node distance=3cm]				(OverSpeed)		{Over Speed Monitor};
+	\node [process, right of=OverSpeed, node distance=3cm]			(GeoFence)		{GeoFence Monitor};
+	\node [process, right of=GeoFence, node distance=3cm]			(Dest)			{Destination Tracking};
+	\node [process, right of=CMD, node distance=3cm]				(SMS)			{SMS Manager};
+	%\node [process, above of=Event, node distance=3cm]				(Config)		{Configuration Manager};
+	\node [process, above of=SMS, node distance=3cm]				(TCP)			{TCP Manager};
+	\node [process, above  of=GPS, node distance=3cm]				(Push)			{Push Notification};
+	\node [process, right of=Push, node distance=3cm]				(FOTA)			{FOTA Manager};
+	\node [process, right of=FOTA, node distance=3cm]				(PM)			{Power Managment};
+	%	\node [process, right of=PM, node distance=3cm]					(USER)			{User Manager};
+	\node [process, below of=SMS, node distance=3cm]				(DBGPort)		{Debug Port};
+	\node [process, right of=SMS, node distance=4cm] 				(Modem)			{Modem Library};
+	\node [process, below of=Modem, node distance=3cm]				(Serial)		{Serial Port};
+	
+	
+	\draw [<->]	(GPS)--(Event);
+	\draw [<->]	(Engine) -- (Event);
+	\draw [<->]	(AC)--(Event);
+	\draw [<->]	(Loud)--(Event);
+	\draw [<->]	(Battery) to [bend right=10](Event);
+	\draw [<->]	(Panic) to (Event);
+	\draw [<->]	(OverSpeed) to (Event);
+	\draw [<->]	(GeoFence)--(Event);
+	\draw [<->]	(Dest)--(Event);
+	%	\draw [<->]	(FOTA)--(CMD);
+	\draw [<->]	(SMS)--(CMD);
+	\draw [<->]	(TCP)--(CMD);
+	%	\draw [<->]	(USER)--(CMD);
+	\draw [<->]	(Push)--(Event);
+	\draw [<->]	(Event)--(CMD);
+	\draw [<->]	(FOTA) to (Event);
+	\draw [<->]	(PM) to (Event);
+	\draw [<->]	(CMD) to (DBGPort);
+	\draw [<->] (SMS) to (Modem);
+	\draw [<->] (TCP) to (Modem);
+	\draw [<->] (DBGPort) to (Serial);
+	
+	\end{tikzpicture}
+	\caption{Overview of Configuration Flow}
+\end{figure}
+
+
+\section{Data From External Sensors:}
+VTD has some external sensors for monitoring Engine Status, Door Status, AC Status, Fuel amount etc. All the external modules will communicate via CAN bus. A dedicated process will continuously monitor the CAN bus for any incoming. After initial parsing, the data will be transferred to specific data processor for further processing.
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture} [node distance = 2cm, auto]
+	\node [datasource]													(MODULES)		{External Modules};
+	\node [process, right of=MODULES, node distance=4cm]				(Bridge)		{Generic Data Bridge(CAN)};
+	\node [process, right of=Bridge, node distance=4cm]					(DProcessor)	{Module Specific Data Processing};
+	\node [process, right of=DProcessor, node distance=4cm]				(MDManager)		{Module Data Manager};
+	
+	\path [line] (MODULES) -- (Bridge);
+	\path [line] (Bridge) -- (DProcessor);
+	\path [line] (DProcessor) -- (MDManager);
+
+	\end{tikzpicture}
+	\caption{Dataflow of External Modules (e.g. Fuel Sensor,Temparature Sensor)}
+\end{figure}
+
+
+\section{SMS Manager:}
+\subsection{Outgoing Messages:}
+From VTS version 2, most of the SMSs will be forwarded to clients from Server. Based on events, device will generate the SMS notification body and pass it to server, Server will send the SMS to client. Such events are Engine on/off, AC on/off, Door open/close etc.
+\begin{figure}[H]
+	\vfill
+	\centering
+	\begin{tikzpicture} [node distance = 2cm, auto]
+	\node [process]														(Modem)		{Modem};
+	\node [process, left of=Modem, node distance = 3cm]					(TCP)		{TCP Connection Manager};
+	\node [process, below of=Modem, node distance = 3cm] 				(SMS)		{SMS Manager};
+	\node [process, below of=SMS, node distance = 3cm]					(Event)		{Event Manager};
+	\node [process, left of=SMS, node distance = 3cm,]					(CMD)		{Command Manager};
+	\node [process, left of=Event, node distance = 3cm]					(Process)	{Task Specific Process};
+	
+	\draw [<->](Modem) -- (SMS);
+	\draw [<->] (TCP) -- (Modem);
+	\draw [<-]	(SMS) -- (Event);
+	\draw [<->] (SMS) -- (CMD);
+	\draw [<->] (CMD) -- (TCP);
+	\draw [<->]	(Event) -- (Process);
+	\end{tikzpicture}
+	\caption{SMS Manager (outgoing messages)}
+\end{figure}
+\vfill
+\subsection{Incoming Messages:}
+For Incoming messages, received message will be parsed by the SMS manager. Since most of the incoming messages are commands, the SMS manager will forward the parsed command to command manager to execute.
+\begin{figure}[H]
+	\vfill
+	\centering
+	\begin{tikzpicture} [node distance = 2cm, auto]
+	\node [process]											(Modem)		{Modem};
+	\node [process, below of=Modem, node distance = 3cm] 	(SMS)		{SMS Manager};
+	\node [process, right of=SMS, node distance = 3cm]		(CMD)	{Command Manager};
+	
+	\draw [<->]	(Modem) -- (SMS);
+	\draw [<->]	(SMS) -- (CMD);
+	\end{tikzpicture}
+	\caption{SMS Manager (incoming messages)}
+\end{figure}
+
+
+\section{Push Notification Service:} Push Notifications will be generated from device, Server doesn'tManagement need to continuously monitor packets to catch major events. When an event occurs, Event manager notifies the Push Notification Service, which then generate an alert or notification and send to server via TCP Connection Manager. Server forwards the alert or notification to Client App.
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture} [node distance = 2cm, auto]
+	\node [datasource]									 		(Server)	{VTS Service Provider};
+	\node [process,below of=Server, node distance =3cm]			(TCP)		{TCP Connection Manager};
+	\node [process, right of=TCP, node distance = 3cm] 			(Notif)		{Notification Manager};
+	\node [process, right of=Notif, node distance = 3cm]		(Event)		{Event Manager};
+	\node [process, right of=Event,node distance = 3cm]			(Process)	{Task Specific Process};
+
+	\draw [<->] (TCP) -- (Server);		
+	\draw [<->]	(TCP) -- (Notif);
+	\draw [<->]	(Notif) -- (Event);
+	\draw [<-]	(Event) -- (Process);
+	\end{tikzpicture}
+	\caption{Notification Management}
+\end{figure}
+
+
+\section{Configuration Manager:} When a new device is installed in a car, it need to be configured. VTS version 2 can be configured via SMS and Web. When a new configuration is send via SMS or from Web, the command manager passes it to Configuration Manager. Configuration Manager then decides where and which variables and settings need to be updated. Those settings are dispatched by the Event Manager to particular Processes and modules. The Configuration Manager also update the configuration settings stored in Flash Memory.
+\begin{figure}[H]
+	\vfill
+	\centering
+	\begin{tikzpicture} [node distance = 2cm, auto]
+	\node [process]																(CMDManager)	{Command Manager};
+	\node [process, below of=CMDManager, node distance = 4cm] 					(Config)	{Configuration Manager};
+	%\node [process, right of=Config, node distance = 4cm]						(Event)		{Event Manager};
+	
+	\node [datasource, above of=CMDManager, node distance=3cm, xshift=-1.5cm] 	(Server)	{VTS Service Provider};
+	\node [datasource, above of=CMDManager, node distance=3cm, xshift=1.5cm] 	(Client)	{Client};
+	
+	\node [process, right of=Config,node distance = 4cm]						(USER)		{User Management};
+	\node [process, left of=Config,node distance = 4cm, yshift=-1cm]			(Logger)	{Data Logger};
+	\node [process, right of=Config,node distance = 4cm, yshift=-3cm]			(CTRL)		{Controll Management};
+	\node [process, below of=Config,node distance = 4cm, xshift=-3cm]			(OPMode)	{Operation Mode};
+	\node [process, below of=Config,node distance = 4cm, xshift=1cm]			(Notif)		{Notification Management};
+
+	\draw [<->] (Client) -- (CMDManager);
+	\draw [<->] (CMDManager) -- (Server);
+			
+	\draw [<->]	(CMDManager) -- (Config);
+	%\draw [<->]	(Config) -- (Event);
+	\draw [<->]	(Config) -- (USER);
+	\draw [<->] (Config) -- (Logger);
+	\draw [<->] (Config) -- (Notif);
+	\draw [<->] (Config) -- (OPMode);
+	\draw [<->] (Config) -- (CTRL);
+	\end{tikzpicture}
+	\caption{Configuration Management}
+\end{figure}
+
+
+\section{FOTA} VTS version 2 has Firmware Over The Air (FOTA) feature for remote firmware upgrade process. Every VTD has a hardware version hard coded in OTP memory of the microcontroller FOTA manager read the OTP memory to find out the hardware id. If a new firmware is available in VTS server, it checks for supported hardware versions of the firmware. If it finds the firmware supported by the hardware, FOTA manager downloads it and burn the firmware at a convenient time. 
+\begin{figure}[H]
+	\vfill
+	\centering
+	\begin{tikzpicture} [node distance = 2cm, auto]
+	\node [datasource]									 		(Server)	{VTS Service Provider Server};
+	\node [process, right of=Server, node distance =3cm]		(TCP)		{TCP Connection Manager};
+	\node [process,right of=TCP, node distance = 3cm]			(CMD)		{Command Manager};
+	\node [process, right of=CMD, node distance = 3cm] 			(FOTA)		{FOTA Manager};
+	\draw [<->] (TCP) -- (Server);		
+	\draw [<->]	(TCP) -- (CMD);
+	\draw [<->] (CMD) -- (FOTA);
+
+	\end{tikzpicture}
+	\caption{FOTA Management}
+\end{figure}
+%
+
+\section{Geo Fence Violation} In the current version of VTS, GPS data is sent to server continuously and server side algorithm monitors the location data to check whether geo fence is violated or not. New version of VTD will have on board geo fence violation checking algorithm.  GPS manager passes GPS location data to Event Manager, it will pass the GPS data to GeoFence Monitor. If algorithm finds the device has violated the Geo Fence, it will generate an GeoFence Violation Event and pass it back to Event Manager again.
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture} [node distance = 2cm, auto]
+	\node [process]									 			(GPS)		{GPS Module};
+	\node [process, right of=GPS, node distance = 3cm]			(Event)		{Event Manager};
+	\node [process, right of=Event, node distance = 3cm] 		(GeoFence)	{GeoFence Monitor};
+	\draw [->] 	(GPS) -- (Event);		
+	\draw [<->]	(Event) -- (GeoFence);
+	
+	\end{tikzpicture}
+	\caption{Geo Fence Violation}
+\end{figure}
+
+\section{Over Speed Check:} In the current version of VTS, GPS data is sent to server continuously and server side algorithm monitors the location data to check whether vehicle has violated the speed limit or not. New version of VTD will have on board speed limit violation checking algorithm.  GPS manager passes GPS location data to Event Manager, it will pass the GPS data to Over Speed monitoring module . If algorithm finds the device has crossed the limit, it will generate an OverSpeed Event and pass it back to Event Manager again.
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture} [node distance = 2cm, auto]
+	\node [process]									 			(GPS)		{GPS Module};
+	\node [process, right of=GPS, node distance = 3cm]			(Event)		{Event Manager};
+	\node [process, right of=Event, node distance = 3cm] 		(OverSpeed)	{OverSpeed Monitor};
+	\draw [->] 	(GPS) -- (Event);		
+	\draw [<->]	(Event) -- (OverSpeed);
+	
+	\end{tikzpicture}
+	\caption{Over Speed Monitoring}
+\end{figure}
+
+\section{Power Manager} Power manager manages the power manager chip BQ24195 over I2C communication and monitors external battery using ADC. Power manager is responsible for turning on or off modem when power is critically low. Though power manager doesn't make any changes to the any hardware module. It generates event and pass it to event manager, or send a command to command manger. Event or Command manager then perform the appropriate action.
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture} [node distance = 2cm, auto]
+	\node [process]									 			(Power)		{Power Manager};
+	\node [process, right of=GPS, node distance = 3cm]			(Event)		{Event Manager};
+	\node [process, below of=Event, node distance = 3cm] 		(CMD)		{Command Manager};
+	\draw [->] 	(GPS) -- (Event);		
+	\draw [<->]	(Power)	-- (CMD);
+	
+	\end{tikzpicture}
+	\caption{Power Manager}
+\end{figure}
+
+
+
+
+\end{document}

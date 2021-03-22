@@ -1,0 +1,48 @@
+
+menu "Event Related Configuration"
+
+	config EVENT_REGISTRY_AT_FLASH
+		bool "CONFIG_EVENT_REGISTRY_AT_FLASH"
+		default y
+	menu "Configure various event id offset value"
+		
+		config EVENT_ID_BASE
+			hex "CONFIG_EVENT_ID_BASE"
+			default 0x200
+		
+		config EVENT_NAME_LENGTH
+			int "Maximum length of name of event"
+			default "16"
+
+
+		menu "Offset value for deiffent event id"
+			config LOCATION_EVENT_OFFSET
+				hex "CONFIG_GPS_EVENT_OFFSET"
+				default 0x01
+
+			config ENGINE_EVENT_OFFSET
+				hex "CONFIG_ENGINE_EVENT_OFFSET"
+				default 0x02
+
+			config AC_EVENT_OFFSET
+				hex "CONFIG_ENGINE_EVENT_OFFSET"
+				default 0x03
+
+			config PANIC_EVENT_OFFSET
+				hex "CONFIG_PANIC_EVENT_OFFSET"
+				default 0x04
+
+			config BATTERY_REMOVAL_EVENT_OFFSET
+				hex "CONFIG_BATTERY_REMOVAL_EVENT_OFFSET"
+				default 0x05
+
+			config BATTERY_LEVEL_EVENT_OFFSET
+				hex "CONFIG_BATTERY_LEVEL_EVENT_OFFSET"
+				default 0x06
+
+			config OVERSPEED_EVENT_OFFSET
+				hex "CONFIG_OVERSPEED_EVENT_OFFSET"
+				default 0x07
+		endmenu
+	endmenu	
+endmenu

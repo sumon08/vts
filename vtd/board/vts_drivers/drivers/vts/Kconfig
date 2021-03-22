@@ -1,0 +1,31 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ENGINE_SENSOR
+	bool "Enable VTS Engine Sensor Driver"
+	default y
+
+
+config PANIC_SENSOR
+	bool "Enable VTS Panic Sensor Driver"
+	default y
+
+config AC_SENSOR
+	bool "Enable VTS AC Sensor Driver"
+	default y
+
+config LOUDHORN
+	bool "Enable VTS LOUDHORN Driver"
+	default y
+
+config BATTERY_SENSOR
+	bool "Enable VTS Car Battery Sensor Driver"
+	default y
+
+config SENSORS_DEBUG
+	bool "Debug sensor drivers"
+	default n
+	---help---
+		Allow the vts sensor drivers to print debug information.

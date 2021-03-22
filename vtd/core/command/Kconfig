@@ -1,0 +1,14 @@
+menu "Command Manager Configuration"
+
+	config	HAVE_USB_DEBUG
+		bool "Enable USB debug port. Currently not supported. Have no impact on code."
+		default n
+
+	config 	REPORT_DEVICE_COMMAND_TO_CONSOLE
+		bool "Enable this option to get device generated command to serial port"
+		default y
+
+	config 	REPORT_DEVICE_COMMAND_TO_TCP
+		bool "Enable this option to get device generated command to serial port"
+		default y
+endmenu

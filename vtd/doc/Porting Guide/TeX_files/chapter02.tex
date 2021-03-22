@@ -1,0 +1,200 @@
+\chapter{Porting Nuttx to STM32F401RC board}
+
+Nuttx only provides core level support for STM32F401RC microcontroller. There is no supported board for Nuttx with STM32F401RC. We have to create a custom board for VTS version 2. All the supported boards reside in nuttx/configs/ directory. Nuttx 7.25 and later versions has support for STM32F01RC microcontroller. We'll be using Nuttx 7.25 for primary firmware development. Which provides driver support for UBlox GSM modem but no GPS driver is provided. Since we're using SIM868 GPS+GSM+GPRS module we need to add driver support for the module. The below sections describes step by step procedure to adding custom board to Nuttx.
+
+\subsection*{Choose an existing board that also has STM32F401 processor}
+Nuttx has been ported to Nucleo F4x1RE board. The microcontroller is from STM32F401 series. Therefore it’ll be easier to make a copy of this board and re-configure it for VTS v2.
+
+\subsection*{Copy the above board configuration folder as vts-v2f401rc}
+The folder has two configuration directories. One for F401 and the other for F411 series, we don’t need the F411 configuration thus can be removed.
+
+\pagebreak
+
+\subsection*{Configuring the Kconfig in ‘config/' directory}
+We need to add multiple entries in multiple sections.
+
+\begin{itemize}
+	\item In “Choice” section add entry for VTS-V2F401RC
+	\newline config ARCH{\_}BOARD{\_}VTSV2F401RC
+	\newline \hspace*{30pt} bool "STM32F401RC based board configuration"
+	\newline \hspace*{30pt}depends on ARCH{\_}CHIP{\_}STM32F401RC
+	\newline \hspace*{30pt} - - - help - - -
+	\newline \hspace*{50pt}Select if you are using a custom board based on STM32F401RCT6 	microcontroller
+	
+	\item In “config”  section add another entry  
+	\newline \hspace*{30pt}default "vts-v2f401rc" if ARCH{\_}BOARD{\_}VTSV2F401RC
+	
+	\item Finally add the new board directory in the list at the end of the config section
+	\newline \hspace*{30pt} if ARCH{\_}BOARD{\_}VTSV2F401RC
+	\newline \hspace*{30pt} source "configs/vts-v2f401rc/Kconfig"
+	\newline \hspace*{30pt} endif
+\end{itemize}
+
+\subsection*{Configuring the Kconfig in vts-v2f401rc/ directory}
+Just add two lines for basic configuration
+	\newline \hspace*{30pt} if ARCH{\_}BOARD{\_}VTSV2F401RC
+	\newline \hspace*{30pt} endif
+
+\subsection*{Configuring the ‘deconfig’ file inside f401-nsh directory}
+The below configuration is intended for development purpose, which might change throughout the whole development process.
+\begin{verbatim}
+	CONFIG_ARCH_BOARD_VTSV2F401RC=y
+	CONFIG_ARCH_BOARD="vts-v2f401rc"
+	CONFIG_ARCH_BUTTONS=n
+	CONFIG_ARCH_CHIP_STM32=y
+	CONFIG_ARCH_CHIP_STM32F401RC=y
+	CONFIG_ARCH_INTERRUPTSTACK=2048
+	CONFIG_ARCH_STACKDUMP=y
+	CONFIG_ARCH="arm"
+	CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y
+	CONFIG_BOARD_LOOPSPERMSEC=8499
+	CONFIG_BUILTIN=y
+	CONFIG_DISABLE_POLL=y
+	CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
+	CONFIG_EXAMPLES_NSH=y
+	CONFIG_HAVE_CXX=y
+	CONFIG_HAVE_CXXINITIALIZE=y
+	CONFIG_INTELHEX_BINARY=n
+	CONFIG_MAX_TASKS=16
+	CONFIG_MAX_WDOGPARMS=2
+	CONFIG_NFILE_DESCRIPTORS=16
+	CONFIG_NFILE_STREAMS=16
+	CONFIG_NSH_BUILTIN_APPS=y
+	CONFIG_NSH_FILEIOSIZE=512
+	CONFIG_NSH_LINELEN=64
+	CONFIG_NSH_READLINE=y
+	CONFIG_PREALLOC_MQ_MSGS=4
+	CONFIG_PREALLOC_TIMERS=4
+	CONFIG_PREALLOC_WDOGS=8
+	CONFIG_RAM_SIZE=65536
+	CONFIG_RAM_START=0x20000000
+	CONFIG_RAW_BINARY=y
+	CONFIG_RR_INTERVAL=200
+	CONFIG_SCHED_WAITPID=y
+	CONFIG_SDCLONE_DISABLE=y
+	CONFIG_SPI=y
+	CONFIG_START_DAY=26
+	CONFIG_START_MONTH=7
+	CONFIG_START_YEAR=2018
+	CONFIG_STM32_JTAG_SW_ENABLE=y
+	CONFIG_STM32_USART1=y
+	CONFIG_STM32_USART6=y
+	CONFIG_TASK_NAME_SIZE=0
+	CONFIG_USART1_SERIAL_CONSOLE=y
+	CONFIG_USER_ENTRYPOINT="nsh_main"
+	CONFIG_WDOG_INTRESERVE=1
+	CONFIG_DEV_GPIO=n
+	CONFIG_STM32_SPI=n
+	CONFIG_STM32_HAVE_OTGFS=n
+	CONFIG_STM32_HAVE_USART6=n
+	CONFIG_STM32_HAVE_I2C2=n
+	CONFIG_STM32_HAVE_I2C3=n
+	CONFIG_STM32_HAVE_SPI2=n
+	CONFIG_STM32_HAVE_SPI3=n
+	CONFIG_STM32_HAVE_I2S3=n
+	CONFIG_PIPES=y
+	CONFIG_MODEM=y
+	CONFIG_MODEM_SIM868=y
+	CONFIG_GPS=y
+	CONFIG_GPS_SIM68=y
+	CONFIG_EXAMPLES_VTS=y
+	CONFIG_BOARD_INITIALIZE=y
+	CONFIG_TLS=y
+	CONFIG_TLS_LOG2_MAXSTACK=12
+	CONFIG_PRIORITY_INHERITANCE=y
+\end{verbatim}
+
+\subsection*{Configuring  vts-v2f401rc/include/}
+\begin{itemize}
+	\item change “neucleo-f401re.h” to “vts-v2f401rc.h”
+	\item In ‘board.h’, in the clocking section put
+	\begin{verbatim}
+	#if defined(CONFIG_ARCH_BOARD_VTSV2F401RC)
+	#  include <arch/board/vts-v2f401rc.h>
+	#endif
+	\end{verbatim}
+	
+	\item In “vts-v2f401rc.h” change include guards to
+	\begin{verbatim}
+		__CONFIGS_VTSV2_F401RC_INCLUDE_VTSV2_F401RC_H
+	\end{verbatim}
+\end{itemize}
+
+\subsection*{Configuring vts-v2f401rc/scripts}
+
+\begin{itemize}
+	
+	\item In scripts/ directory rename f401re.ld to vts-v2f401rc.ld
+	\item Change the memory section of vts-v2f401rc.ld to 
+	\begin{verbatim}
+	MEMORY
+	{
+	flash (rx) : ORIGIN = 0x08000000, LENGTH = 256K
+	sram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+	}
+	\end{verbatim}
+	\pagebreak
+	\item In scripts/Make.defs remove  existing ifeq section and add these lines:
+	\begin{verbatim}
+		ifeq ($(CONFIG_ARCH_BOARD_VTSV2F401RC),y)
+		LDSCRIPT = vts_v2f401rc.ld
+		endif
+	\end{verbatim}
+	
+\end{itemize}
+
+\subsection*{Configuring vts-v2f401rc/src}
+Custom drivers reside in the board-specific directories. Custom drivers such as GPIO, SPI, SIM868 modem, gps driver etc are kept in this directory. Board initialize and board app initialization code is alse kept in this directory. While configuring from a copy of Nucleo4x1RE board the below changes should be made.
+\begin{itemize}
+	\item rename ‘nucleo-f4x1re.h’ to vts-v2f401rc.h
+	\item In “vts-v2f401rc.h” change include guards to :
+	\begin{verbatim}
+	__CONFIGS_VTSV2_F401RC_SRC_VTSV2_F401RC_H
+	\end{verbatim}
+	\item board specific drivers: "stm32{\_}boot.c", "stm32{\_}appinit.c", "stm32{\_}gpio.c", "stm32{\_}sim868.c", "stm32{\_}spi.c", "stm32{\_}sim68.c" are kept in this directory.
+	\item GPIO configurations are defined in "src/vts-v2f401rc.h" all the GPIOs used in VTD board are defined here. For example GPS, MODEM, Charge Controller GPIO pins are defined as below:
+	\begin{verbatim}
+	
+	#define VTS_MDM_VLE		(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+								GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN5)
+	
+	#define VTS_MDM_PWR	(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+							GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN15)
+	
+	#define VTS_STATUS		(GPIO_INPUT|GPIO_FLOAT|GPIO_PORTC|GPIO_PIN4)
+	
+	
+	/* GPS GPIO */
+	
+	#define GPS_ENABLE  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+							GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN8)
+	#define GPS_RESET   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+							GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN9)
+	
+	/* Charge Controller GPIO */
+	
+	#define UC_CE		(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+							GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN10)
+	
+	\end{verbatim}
+	\item For board specific driver initialization during boot various global driver instance function prototypes are declared in "src/vts-v2f401rc.h". For example sim868, sim68, gpio driver instances as follows:
+	\begin{verbatim}
+		#if defined(CONFIG_MODEM) && defined(CONFIG_MODEM_SIM868)
+		void vts_sim868_init(void);
+		#endif
+		
+		#if defined(CONFIG_GPS_SIM68)
+		void sim68_init(void);
+		#endif
+		
+		#if defined(CONFIG_DEV_GPIO)
+		int stm32_gpio_initialize(void);
+		#endif
+	\end{verbatim}
+\end{itemize}
+
+
+\subsection*{Adding support for sim868 MODEM and GPS}
+Nuttx does not provided any support for simcom modules officially. We need to add support for sim868 modem and gps. Low level board specific drivers are kept in nuttx/configs/"board"/src directory. stm32{\_}sim68.c, stm32{\_}sim868.c contains low level drivers from GPS and GSM modules respectively. High level character device drivers are kept in nuttx/drivers directory and relevant header files are kept in nuttx/include/nuttx directory.
+\paragraph*{}
+Character device driver for sim868 Modem is sim868.c kept in /drivers/modem/ directory and device driver for sim68 GPS module is sim68.c in  /driver/gps/. These device drivers creates relevant files in /dev directory for GPS and Modem. Using ioctl() we can turn on/off/reset modem, gps module.

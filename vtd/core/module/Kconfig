@@ -1,0 +1,87 @@
+menu "Module Configuartion"
+	menu "Feature Specific Module id Configuration"
+		config MODULE_ID
+			bool "Configure Feature Specific module id"
+			default y
+			
+		if MODULE_ID
+			config GPS_MODULE_ID
+				hex "CONFIG_GPS_MODULE_ID"
+				default 0x01
+
+			config ENGINE_MODULE_ID
+				hex "CONFIG_ENGINE_MODULE_ID"
+				default 0x02
+
+			config AC_MODULE_ID
+				hex "CONFIG_AC_MODULE_ID"
+				default 0x03
+
+			config DOOR_MODULE_ID
+				hex "CONFIG_DOOR_MODULE_ID"
+				default 0x04
+
+			config PANIC_MODULE_ID
+				hex "CONFIG_PANIC_MODULE_ID"
+				default 0x05
+
+			config OVERSPEED_MODULE_ID
+				hex "CONFIG_OVERSPEED_MODULE_ID"
+				default 0x06
+
+			config GEOFENCE_MODULE_ID
+				hex "CONFIG_GEOFENCE_MODULE_ID"
+				default 0x07
+
+			config AUDIOSPY_MODULE_ID
+				hex "CONFIG_AUDIOSPY_MODULE_ID"
+				default 0x08
+
+			config IMAGE_MODULE_ID
+				hex "CONFIG_IMAGE_MODULE_ID"
+				default 0x09
+
+			config FUEL_MODULE_ID
+				hex "CONFIG_FUEL_MODULE_ID"
+				default 0x0a
+
+			config LOUDHORN_MODULE_ID
+				hex "CONFIG_LOUDHORN_MODULE_ID"
+				default 0x0b
+
+			config BATTERY_MODULE_ID
+				hex "CONFIG_BATTERY_MODULE_ID"
+				default 0x0c
+
+			config USER_MODULE_ID
+				hex "CONFIG_USER_MODULE_ID"
+				default 0x0d
+
+			config FOTA_MODULE_ID
+				hex "CONFIG_FOTA_MODULE_ID"
+				default 0x0e
+
+			config POWER_MODULE_ID
+				hex "CONFIG_POWER_MODULE_ID"
+				default 0x0e
+		endif
+	endmenu
+
+	menu "MODULE DEBUG"
+		config DEBUG_LEVEL
+			int "CONFIG_DEBUG_LEVEL"
+			 default DEBUG_LEVEL_LOW
+
+		config DEBUG_LEVEL_HIGH
+			int "CONFIG_DEBUG_LEVEL_HIGH"
+			default 3
+
+		config DEBUG_LEVEL_MID
+			int "CONFIG_DEBUG_LEVEL_MID"
+			default 2
+
+		config DEBUG_LEVEL_LOW
+			int "CONFIG_DEBUG_LEVEL_LOW"
+			default 1
+	endmenu
+endmenu

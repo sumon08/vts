@@ -1,0 +1,96 @@
+menu "Protocol Configuration" 
+    config HAVE_PACKET_PADDING_SCHEAM
+        bool "Select this macro if packet data is padded."
+        default y
+    
+    config MAKE_PACKET_BUFFER_OVERFLOW_RETURN_VALUE
+        hex "Make packet function return value in case of buffer overflowed case hit."
+        default 0x07E8
+    
+    config MAKE_PACKET_MAX_VALID_RETURN_VALUE 
+        hex "Maximum return value from make function."
+        default 0x0400
+    
+    menu "Configure Packet version Specific constant settings"
+		config PACKET_VERSION_4
+			bool "Configure Packet version 4 Specific constant settings"
+			default y
+
+		if PACKET_VERSION_4
+
+			config START_STOP_FLAG
+				hex "CONFIG_START_STOP_FLAG"
+				default 0xf9
+
+			config CONTROL_CHANNEL_ID
+				hex "CONFIG_CONTROL_CHANNEL_ID"
+				default 0x00
+
+			config GPS_CHANNEL_ID
+				hex "CONFIG_GPS_CHANNEL_ID"
+				default 0x01
+
+			config ENGINE_CHANNEL_ID
+				hex "CONFIG_ENGINE_CHANNEL_ID"
+				default 0x02
+
+			config AC_CHANNEL_ID
+				hex "CONFIG_AC_CHANNEL_ID"
+				default 0x03
+
+			config DOOR_CHANNEL_ID
+				hex "CONFIG_DOOR_CHANNEL_ID"
+				default 0x04
+
+			config PANIC_CHANNEL_ID
+				hex "CONFIG_PANIC_CHANNEL_ID"
+				default 0x05
+
+			config OVERSPEED_CHANNEL_ID
+				hex "CONFIG_OVERSPEED_CHANNEL_ID"
+				default 0x06
+
+			config GEOFENCE_CHANNEL_ID
+				hex "CONFIG_GEOFENCE_CHANNEL_ID"
+				default 0x07
+
+			config AUDIOSPY_CHANNEL_ID
+				hex "CONFIG_AUDIOSPY_CHANNEL_ID"
+				default 0x08
+
+			config IMAGE_CHANNEL_ID
+				hex "CONFIG_IMAGE_CHANNEL_ID"
+				default 0x09
+
+			config FUEL_CHANNEL_ID
+				hex "CONFIG_FUEL_CHANNEL_ID"
+				default 0x0a
+
+			config LOUDHORN_CHANNEL_ID
+				hex "CONFIG_LOUDHORN_CHANNEL_ID"
+				default 0x0b
+
+			config BATTERY_CHANNEL_ID
+				hex "CONFIG_BATTERY_CHANNEL_ID"
+				default 0x0c
+
+			config USER_CHANNEL_ID
+				hex "CONFIG_USER_CHANNEL_ID"
+				default 0x0d
+
+			config FOTA_CHANNEL_ID
+				hex "CONFIG_FOTA_CHANNEL_ID"
+				default 0x0e
+
+			config POWER_CHANNEL_ID
+				hex "CONFIG_POWER_CHANNEL_ID"
+				default 0x0f
+		endif
+	endmenu	
+
+    source "protocol/default/Kconfig"
+
+    source "protocol/engine/Kconfig"
+    
+endmenu
+

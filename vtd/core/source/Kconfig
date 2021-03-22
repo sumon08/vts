@@ -1,0 +1,9 @@
+menu "Source Code Related Configuration"
+	config CONFIG_HEAP_SIZE
+	int "Configure Heap Size for VTS, default set to 20KB"
+	default 20480
+
+	config EVENT_FIFO_MAX_SIZE
+	int "Maximum size of Event Manager Command Buffer FIFO"
+	default 100
+endmenu

@@ -1,0 +1,32 @@
+############################################################################
+# drivers/vts_sensors/Make.defs
+#
+#   Copyright (C) Pi Labs Bangladesh Ltd. All rights reserved.
+#
+############################################################################
+
+ifeq ($(CONFIG_VTS_SENSORS),y)
+
+ifeq ($(CONFIG_ENGINE_SENSOR),y)
+CSRCS += engine.c
+endif
+
+
+ifeq ($(CONFIG_PANIC_SENSOR),y)
+CSRCS += panic.c
+endif
+
+ifeq ($(CONFIG_AC_SENSOR),y)
+CSRCS += ac.c
+endif
+ifeq ($(CONFIG_LOUDHORN),y)
+CSRCS += loudhorn.c
+endif
+
+# Include vts_sensors driver build support
+
+DEPPATH += --dep-path vts
+VPATH += :vts
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)vts}
+
+endif

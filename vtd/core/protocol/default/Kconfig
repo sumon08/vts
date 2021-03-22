@@ -1,0 +1,63 @@
+
+
+
+menu "Parser Error Id List"
+
+    config BAD_CHECKSUM_ERROR_ID
+        hex "Id for bad checksum error."
+        default 0x01
+        
+    config BAD_FORMAT_ERROR_ID
+        hex "Id for bad format error."
+        default 0x02
+
+    config DATA_LENGTH_ERROR_ID
+        hex "Id for data length error."
+        default 0x03
+
+    config DATA_LENGTH_MISSMATCH_ERROR_ID
+        hex "Id for data length missmatch error."
+        default 0x04
+    
+    config BAD_ENCRYPTION_ERROR_ID
+        hex "Id for bad encryption error"
+        default 0x05
+    
+    config IN_SUFFICIENT_PARAM_ERROR_ID
+        hex "Id for insufficient parameter error."
+        default 0x06
+
+    config INVALID_PARAM_ERROR_ID
+        hex "Id for Invalid parameter error"
+        default 0x07
+
+    config NOT_IMPLEMENTED_ERROR_ID
+        hex "Id for not implemented error."
+        default 0x08
+
+    config PARAM_OVERLOADED_ERROR_ID
+        hex "Id for parameter overloaded."
+        default 0x09
+
+    config UNKNOWN_COMMAND_ERROR_ID
+        hex "Id for unknown command error."
+        default 0x0A;
+
+    config BUFFER_OVERLOAD_ERROR_ID
+        hex "Id for buffer error id."
+        default 0x0B
+
+    config PACKET_OVERLOAD_ERROR_ID
+        hex "Id for large data packet error id."
+        default 0x0C
+
+    config BAD_PARSER_ERROR_ID
+        hex "Id for large data packet error id."
+        default 0x0D
+    
+    config UNKNOWN_REPLY_ERROR_ID
+        hex "Id for large data packet error id."
+        default 0x0E
+
+
+endmenu
